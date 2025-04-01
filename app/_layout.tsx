@@ -4,9 +4,12 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
 
+import CustomHeader from '@/components/custom/customHeader';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import "../global.css";
+import ActiveLists from '../components/custom/activeList'
+import {ListProvider} from '@/context/listContent';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -28,12 +31,18 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+<ListProvider>
+    <ThemeProvider value={DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      
+        <Stack.Screen
+          name="(tabs)"
+          options={{ header: () => <CustomHeader title="Smith Homes" /> }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
+    </ListProvider>
   );
 }
