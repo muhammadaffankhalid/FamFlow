@@ -38,6 +38,17 @@ export async function getItem(itemID: string) {
 
 // function to delete items from list
 export async function deleteItem(itemId: string) {
+  if (!itemId) {
+    console.error('❌ Error: itemId is undefined or invalid');
+    return null;
+  }
+  // const { dat, err } = await supabase
+  //   .from('items')
+  //   .select('id')
+  //   .eq('id', itemId)
+  //   .single(); // Get a single item
+
+  //   console.log('Item data:', dat);
   const { data, error } = await supabase
     .from('items')
     .delete()
@@ -48,7 +59,7 @@ export async function deleteItem(itemId: string) {
     console.error('Error deleting item:', error);
     return null;
   }
-  console.log('Item deleted:', data);   
+  console.log('Item deleted:', data);
   return data;
 }
 // function to delete list
@@ -84,7 +95,7 @@ export async function getlists() {
   .select(`
     id,
     name,
-    items( name, quantity,bought )`
+    items(id, name, quantity,bought )`
   );
   if (error) {
     console.error("Error fetching lists:", error);

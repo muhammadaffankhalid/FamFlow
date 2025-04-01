@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,12 +13,29 @@ import Icon from 'react-native-vector-icons/Entypo';
 import Icon2 from 'react-native-vector-icons/FontAwesome';
 import { addlistandItems } from '@/lib/supabaseQueries';
 import { getHomeID } from '@/lib/supabaseQueries';
+import { useList } from '@/context/listContent';
+
 function NewList({ onClose }: { onClose: () => void }) {
-  const [items, setItems] = React.useState<
+  const { fetchLists } = useList();
+
+  const [items, setItems] = useState<
     { name: string; quantity: number; bought: boolean }[]
   >([]);
-  const [itemName, setItemName] = React.useState('');
-  const [homeID, setHomeID] = React.useState('');
+  const [itemName, setItemName] = useState('');
+  const [homeID, setHomeID] = useState('');
+
+  useEffect(() => {
+    const homeid = async () => {
+      const homeId = await getHomeID();
+      if (homeId && homeId.length > 0) {
+        setHomeID(homeId[0].id.toString());
+      } else {
+        console.error('Home ID is null or empty');
+      }
+    };
+    homeid();
+  }, []);
+
   const handleAddItem = () => {
     if (itemName.trim() === '') {
       Alert.alert('Please enter an item name');
@@ -37,19 +54,24 @@ function NewList({ onClose }: { onClose: () => void }) {
   const validationSchema = Yup.object().shape({
     title: Yup.string().required('Title is required'),
   });
-useEffect(() => {
-  const homeid = async () => {  
-    const homeId = await getHomeID();
-    if (homeId && homeId.length > 0) {
-      setHomeID(homeId[0].id.toString());
-    } else {
-      console.error('Home ID is null or empty');
-    }
-  
-  }
-homeid();
 
-},[])
+  const handleSubmitForm = async (values: { title: string }) => {
+    if (items.length === 0) {
+      Alert.alert('Please add at least one item');
+      return;
+    }
+    try {
+      await addlistandItems(values.title, items, homeID);
+      Alert.alert('List created successfully');
+      setItems([]); // Clear items after saving
+      onClose(); // Close the form/modal
+      fetchLists(); // Refresh the list data
+    } catch (error) {
+      console.error('Error creating list:', error);
+      Alert.alert('Error creating list');
+    }
+  };
+
   return (
     <View className="absolute inset-0 z-50 h-screen">
       <View className="flex-1 bg-white overflow-hidden rounded-lg opacity-100">
@@ -66,25 +88,9 @@ homeid();
         <Formik
           initialValues={{ title: '' }}
           validationSchema={validationSchema}
-          onSubmit={async (values) => {
-            if (items.length === 0) {
-              Alert.alert('Please add at least one item');
-              return;
-            }
-
-            console.log('list title:', values.title);
-            console.log('items:', items);
-
-            try {
-              await addlistandItems(values.title, items,homeID);
-              Alert.alert('List created successfully');
-              setItems([]);
-              onClose();
-            } catch (error) {
-              console.error('Error creating list:', error);
-              Alert.alert('Error creating list');
-            }
-          }}
+          onSubmit={handleSubmitForm}
+          validateOnBlur={false}
+          validateOnChange={false}
         >
           {({
             handleChange,

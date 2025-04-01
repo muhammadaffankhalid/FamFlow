@@ -28,7 +28,7 @@ export default function HomeScreen() {
     setItemID(itemID);
   };
 
-    useFocusEffect(
+  useFocusEffect(
 
       useCallback(() => {
         fetchLists();

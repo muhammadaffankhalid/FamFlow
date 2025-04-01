@@ -17,38 +17,14 @@ const ActiveLists = ({
   onitemidPress: (itemID: string) => void;
 
 }) => {
-  const [activeLists, setActiveLists] = useState<
-    { title: string; Icon: string; time: string; items: string[]; id: string }[]
-  >([]);
 
 
-  useEffect(() => {
-    const fetchLists = async () => {
-      const lists = await getlists();
-      if (lists) {
-        const formattedLists = lists.map((list) => ({
-          title: list.name,
-          Icon: 'clipboard-list',
-          time: 'Today',
-          items: list.items.map((item) => item.name),
-          id: list.id,
-        }));
-        setActiveLists(formattedLists);
-      }
-    };
-
-    fetchLists();
-  }, []);
+  const {  lists} = useList();
 
 
-  const listContext = useList();
 
-  if (!listContext) {
-    console.error('useList() returned null. Ensure the ListProvider is wrapping this component.');
-    return null;
-  }
 
-  const { lists, handleDeleteList } = listContext;
+
   
   return (
     <>
@@ -70,7 +46,7 @@ const ActiveLists = ({
 
       {/* Active Lists */}
       <View className="bg-white rounded-lg p-3">
-        {activeLists.map((item, index) => (
+        {lists.map((item, index) => (
           <TouchableOpacity
             key={item.id}
             className="mb-3 border-b border-gray-200 pb-2"
@@ -82,15 +58,15 @@ const ActiveLists = ({
             <View className="flex flex-row justify-between items-center">
               <View className="flex flex-row items-center">
                 <Icon2 name="cart-shopping" size={20} color="#333" />
-                <Text className="text-base font-medium ml-2">{item.title}</Text>
+                <Text className="text-base font-medium ml-2">{item.name}</Text>
               </View>
-              <Text className="text-xs text-gray-500">{item.time}</Text>
+              <Text className="text-xs text-gray-500">{item.created_at}</Text>
             </View>
             <View className="mt-1 ml-6">
-              {item.items.map((grocery, idx) => (
+              {item.items.map((item, idx) => (
                 <View key={idx} className="flex flex-row items-center mb-1">
                   <Icon name="square-o" size={14} color="#333" />
-                  <Text className="ml-2 text-sm">{grocery}</Text>
+                  <Text className="ml-2 text-sm">{item.name}</Text>
                 </View>
               ))}
             </View>
